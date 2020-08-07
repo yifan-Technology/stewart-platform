@@ -5,12 +5,12 @@
 #define PWM_MAX 255
 
 
-//----------------------------Declaration Pin Nummer-----------------------------//
+//----------------------------Declaration Pin Nummer-----------------------------
 byte motorAPinNum[6] = {1, 2, 3, 4, 5, 6};
 byte motorBPinNum[6] = {1, 2, 3, 4, 5, 6};
 byte motorPwmPinNum[6] = {1, 2, 3, 4, 5, 6};
 byte motorPosPinNum[6] = {A1, A2, A3, A4, A5, A6};
-//----------------------------Declaration controller-------------------------------//
+//----------------------------Declaration controller-------------------------------
 double normPos[6] = {0, 0, 0, 0, 0, 0};
 double actualPos[6] = {0, 0, 0, 0, 0, 0};
 double pwm[6] = {0, 0, 0, 0, 0, 0};
