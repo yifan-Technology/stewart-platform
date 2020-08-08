@@ -14,12 +14,12 @@ byte motorBPinNum[6] = {31, 33, 35, 37, 39, 41};
 byte motorPwmPinNum[6] = { 2, 3, 4, 5, 6, 7};
 byte motorPosPinNum[6] = {A1, A2, A3, A4, A5, A6};
 //----------------------------Declaration controller-------------------------------
-double normPos[6] = {0, 0, 0, 0, 0, 0};
+double normPos[6] = {100, 0, 0, 0, 0, 0};
 double actualPos[6] = {0, 0, 0, 0, 0, 0};
 double pwm[6] = {0, 0, 0, 0, 0, 0};
-double Kp[6] = {100, 0, 0, 0, 0, 0};
-double Ki[6] = {0, 0, 0, 0, 0, 0};
-double Kd[6] = {10, 0, 0, 0, 0, 0};
+double Kp[6] = {100, 100, 100, 100, 100, 90};
+double Ki[6] = {0, 0, 10, 10, 10, 0};
+double Kd[6] = {10, 10, 10, 10, 10, 10};
 
 AutoPID motorPID0(&actualPos[0], &normPos[0], &pwm[0], PWM_MIN, PWM_MAX, Kp[0], Ki[0], Kd[0]);
 AutoPID motorPID1(&actualPos[1], &normPos[1], &pwm[1], PWM_MIN, PWM_MAX, Kp[1], Ki[1], Kd[1]);
@@ -34,37 +34,54 @@ AutoPID motorPID[6] = {motorPID0, motorPID1, motorPID2, motorPID3, motorPID4, mo
 void motorController(byte motorNum) {
   analogReadResolution(ANALOG_BIT);
   analogWriteResolution(ANALOG_BIT);
-  actualPos[motorNum] = 100.0 *analogRead(motorPosPinNum[motorNum]) / PWM_MAX;
- // motorPID[motorNum].run();
- double difposition = abs(actualPos[motorNum]-normPos[motorNum]);
- 
- if (difposition > 1.5){                           //全速
-    digitalWrite(motorAPinNum[motorNum], HIGH);
-    digitalWrite(motorBPinNum[motorNum], LOW);
-    analogWrite(motorPwmPinNum[motorNum], PWM_MAX);
- }
- else if(difposition < 1.5)
- {                                            //pid介入控制
-  motorPID[motorNum].run();
-  if (pwm[motorNum] > 0) {
-    digitalWrite(motorAPinNum[motorNum], HIGH);       //前进
-    digitalWrite(motorBPinNum[motorNum], LOW);
-    analogWrite(motorPwmPinNum[motorNum], abs(pwm[motorNum]));
-  }
-  else if (pwm[motorNum] < 0) {                       //后退
-    digitalWrite(motorAPinNum[motorNum], LOW);
-    digitalWrite(motorBPinNum[motorNum], HIGH);
-    analogWrite(motorPwmPinNum[motorNum], abs(pwm[motorNum]));
-  }
-  else {
-    digitalWrite(motorAPinNum[motorNum], LOW);        //停止
+  actualPos[motorNum] = 100.0 * analogRead(motorPosPinNum[motorNum]) / PWM_MAX;
+  double diffposition = actualPos[motorNum] - normPos[motorNum];
+  if ((actualPos[motorNum] > 99.8) || (actualPos[motorNum] < 0.2)) {
+    digitalWrite(motorAPinNum[motorNum], LOW);          //当杆长100mm或小于0.2mm时停止运作
     digitalWrite(motorBPinNum[motorNum], LOW);
     analogWrite(motorPwmPinNum[motorNum], 0);
-
   }
- }
- 
-  //A->B is positive; B->A is negative;  
+  else {
+
+    if (abs(diffposition) > 1.3) {
+      if (diffposition < 0)  {
+        digitalWrite(motorAPinNum[motorNum], HIGH);         //前进
+        digitalWrite(motorBPinNum[motorNum], LOW);
+        analogWrite(motorPwmPinNum[motorNum], PWM_MAX);    //全速
+
+      }
+      else if (diffposition > 0) {
+        digitalWrite(motorAPinNum[motorNum], LOW);          //后退
+        digitalWrite(motorBPinNum[motorNum], HIGH);
+        analogWrite(motorPwmPinNum[motorNum], PWM_MAX);    //全速
+
+      }
+    }
+
+    else if (abs(diffposition) < 1.3)
+    { //pid介入控制
+      motorPID[motorNum].run();
+      if (pwm[motorNum] > 0) {
+        digitalWrite(motorAPinNum[motorNum], HIGH);       //前进
+        digitalWrite(motorBPinNum[motorNum], LOW);
+        analogWrite(motorPwmPinNum[motorNum], abs(pwm[motorNum]));
+
+      }
+      else if (pwm[motorNum] < 0) {                       //后退
+        digitalWrite(motorAPinNum[motorNum], LOW);
+        digitalWrite(motorBPinNum[motorNum], HIGH);
+        analogWrite(motorPwmPinNum[motorNum], abs(pwm[motorNum]));
+
+      }
+      else {
+        digitalWrite(motorAPinNum[motorNum], LOW);        //停止
+        digitalWrite(motorBPinNum[motorNum], LOW);
+        analogWrite(motorPwmPinNum[motorNum], 0);
+      }
+    }
+  }
+
+  //A->B is positive; B->A is negative;
 }
 //---------------------------ros2-------------------------------------------------------------
 void publishJointState(sensor_msgs::JointState* msg, void* arg)
