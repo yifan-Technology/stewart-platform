@@ -5,7 +5,7 @@
 #define PWM_MAX 255
 
 
-//----------------------------Declaration Pin Nummer------------------------------
+//----------------------------Declaration Pin Nummer------------------------------564645
 byte motorAPinNum[6] = {1, 2, 3, 4, 5, 6};
 byte motorBPinNum[6] = {1, 2, 3, 4, 5, 6};
 byte motorPwmPinNum[6] = {1, 2, 3, 4, 5, 6};
