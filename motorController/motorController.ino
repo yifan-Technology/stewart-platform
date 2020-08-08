@@ -1,22 +1,22 @@
 
 #include "AutoPID.h"
-#define ANALOG_BIT 8
-#define PWM_MIN -255 //mega:8bit max 255, due:12bit 4095 
-#define PWM_MAX 255
+#define ANALOG_BIT 12
+#define PWM_MIN -4095 //mega:8bit max 255, due:12bit 4095 
+#define PWM_MAX 4095
 
 
 //----------------------------Declaration Pin Nummer------------------------------/
-byte motorAPinNum[6] = {1, 2, 3, 4, 5, 6};
-byte motorBPinNum[6] = {1, 2, 3, 4, 5, 6};
-byte motorPwmPinNum[6] = {1, 2, 3, 4, 5, 6};
+byte motorAPinNum[6] = {30, 32, 34, 36, 38, 40};
+byte motorBPinNum[6] = {31, 33, 35, 37, 39, 41};
+byte motorPwmPinNum[6] = { 2, 3, 4, 5, 6, 7};
 byte motorPosPinNum[6] = {A1, A2, A3, A4, A5, A6};
 //----------------------------Declaration controller-------------------------------
-double normPos[6] = {0, 0, 0, 0, 0, 0};
+double normPos[6] = {80, 0, 0, 0, 0, 0};
 double actualPos[6] = {0, 0, 0, 0, 0, 0};
 double pwm[6] = {0, 0, 0, 0, 0, 0};
-double Kp[6] = {0, 0, 0, 0, 0, 0};
+double Kp[6] = {100, 0, 0, 0, 0, 0};
 double Ki[6] = {0, 0, 0, 0, 0, 0};
-double Kd[6] = {0, 0, 0, 0, 0, 0};
+double Kd[6] = {10, 0, 0, 0, 0, 0};
 
 AutoPID motorPID0(&actualPos[0], &normPos[0], &pwm[0], PWM_MIN, PWM_MAX, Kp[0], Ki[0], Kd[0]);
 AutoPID motorPID1(&actualPos[1], &normPos[1], &pwm[1], PWM_MIN, PWM_MAX, Kp[1], Ki[1], Kd[1]);
@@ -29,28 +29,39 @@ AutoPID motorPID[6] = {motorPID0, motorPID1, motorPID2, motorPID3, motorPID4, mo
 
 //---------------------------fuction motor controller------------------------------------------
 void motorController(byte motorNum) {
-
-  actualPos[motorNum] = analogRead(motorPosPinNum[motorNum]);
-  motorPID[motorNum].run();
-
-  //A->B is positive; B->A is negative;
-  if (pwm[motorNum] > 0) {
+  analogReadResolution(ANALOG_BIT);
+  analogWriteResolution(ANALOG_BIT);
+  actualPos[motorNum] = 100.0 *analogRead(motorPosPinNum[motorNum]) / PWM_MAX;
+ // motorPID[motorNum].run();
+ double difposition = abs(actualPos[motorNum]-normPos[motorNum]);
+ 
+ if (difposition > 1.5){                           //全速
     digitalWrite(motorAPinNum[motorNum], HIGH);
-    digitalWrite(motorAPinNum[motorNum], LOW);
+    digitalWrite(motorBPinNum[motorNum], LOW);
+    analogWrite(motorPwmPinNum[motorNum], PWM_MAX);
+ }
+ else if(difposition < 1.5)
+ {                                            //pid介入控制
+  motorPID[motorNum].run();
+  if (pwm[motorNum] > 0) {
+    digitalWrite(motorAPinNum[motorNum], HIGH);       //前进
+    digitalWrite(motorBPinNum[motorNum], LOW);
     analogWrite(motorPwmPinNum[motorNum], abs(pwm[motorNum]));
   }
-  else if (pwm[motorNum] < 0) {
+  else if (pwm[motorNum] < 0) {                       //后退
     digitalWrite(motorAPinNum[motorNum], LOW);
-    digitalWrite(motorAPinNum[motorNum], HIGH);
+    digitalWrite(motorBPinNum[motorNum], HIGH);
     analogWrite(motorPwmPinNum[motorNum], abs(pwm[motorNum]));
   }
   else {
-    digitalWrite(motorAPinNum[motorNum], LOW);
-    digitalWrite(motorAPinNum[motorNum], LOW);
+    digitalWrite(motorAPinNum[motorNum], LOW);        //停止
+    digitalWrite(motorBPinNum[motorNum], LOW);
     analogWrite(motorPwmPinNum[motorNum], 0);
 
   }
-  
+ }
+ 
+  //A->B is positive; B->A is negative;  
 }
 
 // setup
@@ -63,8 +74,7 @@ void setup() {
     digitalWrite(motorAPinNum[i], LOW);
     digitalWrite(motorBPinNum[i], LOW);
   }
-  analogReadResolution(ANALOG_BIT);
-  analogWriteResolution(ANALOG_BIT);
+
 }
 
 // loop
@@ -73,6 +83,7 @@ void setup() {
   for (byte i = 0; i < 6; i++)
     motorController(i);
   }*/
+
 void loop() {
   motorController(0);
   Serial.print(pwm[0]);
@@ -81,3 +92,12 @@ void loop() {
   Serial.print(',');
   Serial.println(actualPos[0]);
 }
+
+/* 
+void loop() {
+  digitalWrite(motorAPinNum[0], HIGH);
+  digitalWrite(motorBPinNum[0], LOW);
+  analogWriteResolution(ANALOG_BIT);
+  analogWrite(motorPwmPinNum[0], 500 );
+}
+*/
