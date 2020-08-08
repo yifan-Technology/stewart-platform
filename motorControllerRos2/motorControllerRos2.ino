@@ -8,12 +8,12 @@
 #define XRCEDDS_PORT  Serial
 #define PUBLISH_FREQUENCY 2 //hz
 
-//----------------------------Declaration Pin Nummer------------------------------
+//----------------------------Declaration Pin Nummer------------------------------&
 byte motorAPinNum[6] = {30, 32, 34, 36, 38, 40};
 byte motorBPinNum[6] = {31, 33, 35, 37, 39, 41};
 byte motorPwmPinNum[6] = { 2, 3, 4, 5, 6, 7};
 byte motorPosPinNum[6] = {A1, A2, A3, A4, A5, A6};
-//----------------------------Declaration controller-------------------------------
+//----------------------------Declaration controller-------------------------------&
 double normPos[6] = {100, 0, 0, 0, 0, 0};
 double actualPos[6] = {0, 0, 0, 0, 0, 0};
 double pwm[6] = {0, 0, 0, 0, 0, 0};
