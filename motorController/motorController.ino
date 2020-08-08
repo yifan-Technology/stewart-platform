@@ -50,8 +50,7 @@ void motorController(byte motorNum) {
     analogWrite(motorPwmPinNum[motorNum], 0);
 
   }
-  analogReadResolution(ANALOG_BIT);
-  analogWriteResolution(ANALOG_BIT);
+  
 }
 
 // setup
@@ -64,7 +63,8 @@ void setup() {
     digitalWrite(motorAPinNum[i], LOW);
     digitalWrite(motorBPinNum[i], LOW);
   }
-
+  analogReadResolution(ANALOG_BIT);
+  analogWriteResolution(ANALOG_BIT);
 }
 
 // loop
