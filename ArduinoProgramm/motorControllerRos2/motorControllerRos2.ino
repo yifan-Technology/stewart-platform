@@ -9,8 +9,8 @@
 #define PUBLISH_FREQUENCY 100 //hz
 
 //----------------------------Declaration Pin Nummer------------------------------//
-byte motorAPinNum[6] = {30, 32, 34, 36, 38, 40};
-byte motorBPinNum[6] = {31, 33, 35, 37, 39, 41};
+byte motor1PinNum[6] = {30, 32, 34, 36, 38, 40};
+byte motor2PinNum[6] = {31, 33, 35, 37, 39, 41};
 byte motorPwmPinNum[6] = { 2, 3, 4, 5, 6, 7};
 byte motorPosPinNum[6] = {A1, A2, A3, A4, A5, A6};
 //----------------------------Declaration controller-------------------------------//
@@ -37,22 +37,22 @@ void motorController(byte motorNum) {
   actualPos[motorNum] = 100.0 * analogRead(motorPosPinNum[motorNum]) / PWM_MAX;
   double diffposition = actualPos[motorNum] - normPos[motorNum];
   if ((actualPos[motorNum] > 99.8) || (actualPos[motorNum] < 0.2)) {
-    digitalWrite(motorAPinNum[motorNum], LOW);          //当杆长100mm或小于0.2mm时停止运作
-    digitalWrite(motorBPinNum[motorNum], LOW);
+    digitalWrite(motor1PinNum[motorNum], LOW);          //当杆长100mm或小于0.2mm时停止运作
+    digitalWrite(motor2PinNum[motorNum], LOW);
     analogWrite(motorPwmPinNum[motorNum], 0);
   }
   else {
 
     if (abs(diffposition) > 1.3) {
       if (diffposition < 0)  {
-        digitalWrite(motorAPinNum[motorNum], HIGH);         //前进
-        digitalWrite(motorBPinNum[motorNum], LOW);
+        digitalWrite(motor1PinNum[motorNum], HIGH);         //前进
+        digitalWrite(motor2PinNum[motorNum], LOW);
         analogWrite(motorPwmPinNum[motorNum], PWM_MAX);    //全速
 
       }
       else if (diffposition > 0) {
-        digitalWrite(motorAPinNum[motorNum], LOW);          //后退
-        digitalWrite(motorBPinNum[motorNum], HIGH);
+        digitalWrite(motor1PinNum[motorNum], LOW);          //后退
+        digitalWrite(motor2PinNum[motorNum], HIGH);
         analogWrite(motorPwmPinNum[motorNum], PWM_MAX);    //全速
 
       }
@@ -62,26 +62,26 @@ void motorController(byte motorNum) {
     { //pid介入控制
       motorPID[motorNum].run();
       if (pwm[motorNum] > 0) {
-        digitalWrite(motorAPinNum[motorNum], HIGH);       //前进
-        digitalWrite(motorBPinNum[motorNum], LOW);
+        digitalWrite(motor1PinNum[motorNum], HIGH);       //前进
+        digitalWrite(motor2PinNum[motorNum], LOW);
         analogWrite(motorPwmPinNum[motorNum], abs(pwm[motorNum]));
 
       }
       else if (pwm[motorNum] < 0) {                       //后退
-        digitalWrite(motorAPinNum[motorNum], LOW);
-        digitalWrite(motorBPinNum[motorNum], HIGH);
+        digitalWrite(motor1PinNum[motorNum], LOW);
+        digitalWrite(motor2PinNum[motorNum], HIGH);
         analogWrite(motorPwmPinNum[motorNum], abs(pwm[motorNum]));
 
       }
       else {
-        digitalWrite(motorAPinNum[motorNum], LOW);        //停止
-        digitalWrite(motorBPinNum[motorNum], LOW);
+        digitalWrite(motor1PinNum[motorNum], LOW);        //停止
+        digitalWrite(motor2PinNum[motorNum], LOW);
         analogWrite(motorPwmPinNum[motorNum], 0);
       }
     }
   }
 
-  //A->B is positive; B->A is negative;
+  //1->2 is positive; 2->1 is negative;
 }
 //---------------------------ros2-------------------------------------------------------------
 void publishJointState(sensor_msgs::JointState* msg, void* arg)
@@ -137,11 +137,11 @@ class JointStatePubAndSub : public ros2::Node
 void setup() {
 
   for (byte i = 0; i < 6; i++) {
-    pinMode(motorAPinNum[i], OUTPUT);
-    pinMode(motorBPinNum[i], OUTPUT);
+    pinMode(motor1PinNum[i], OUTPUT);
+    pinMode(motor2PinNum[i], OUTPUT);
     pinMode(motorPwmPinNum[i], OUTPUT);
-    digitalWrite(motorAPinNum[i], LOW);
-    digitalWrite(motorBPinNum[i], LOW);
+    digitalWrite(motor1PinNum[i], LOW);
+    digitalWrite(motor2PinNum[i], LOW);
   }
 
   XRCEDDS_PORT.begin(115200);
@@ -170,8 +170,8 @@ void loop() {
 */
 /* 
 void loop() {
-  digitalWrite(motorAPinNum[0], HIGH);
-  digitalWrite(motorBPinNum[0], LOW);
+  digitalWrite(motor1PinNum[0], HIGH);
+  digitalWrite(motor2PinNum[0], LOW);
   analogWriteResolution(ANALOG_BIT);
   analogWrite(motorPwmPinNum[0], 500 );
 }
