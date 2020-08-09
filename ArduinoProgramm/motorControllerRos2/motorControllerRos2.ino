@@ -14,10 +14,10 @@ byte motor2PinNum[6] = {31, 33, 35, 37, 39, 41};
 byte motorPwmPinNum[6] = { 2, 3, 4, 5, 6, 7};
 byte motorPosPinNum[6] = {A1, A2, A3, A4, A5, A6};
 //----------------------------Declaration controller-------------------------------//
-double normPos[6] = {50, 50, 50, 50, 50, 50};
+double normPos[6] = {25, 25, 25, 25, 25, 25};
 double actualPos[6] = {0, 0, 0, 0, 0, 0};
 double pwm[6] = {0, 0, 0, 0, 0, 0};
-double Kp[6] = {100, 100, 100, 100, 100, 90};
+double Kp[6] = {100, 100, 100, 100, 100, 100};
 double Ki[6] = {0, 0, 0, 0, 0, 0};
 double Kd[6] = {10, 10, 10, 10, 10, 10};
 
@@ -43,7 +43,7 @@ void motorController(byte motorNum) {
   }
   else {
 
-    if (abs(diffposition) > 1.3) {
+    if (abs(diffposition) > 1.5) {
       if (diffposition < 0)  {
         digitalWrite(motor1PinNum[motorNum], HIGH);         //前进
         digitalWrite(motor2PinNum[motorNum], LOW);
@@ -58,7 +58,7 @@ void motorController(byte motorNum) {
       }
     }
 
-    else if (abs(diffposition) < 1.3)
+    else if (abs(diffposition) < 1.5)
     { //pid介入控制
       motorPID[motorNum].run();
       if (pwm[motorNum] > 0) {
@@ -135,7 +135,11 @@ class JointStatePubAndSub : public ros2::Node
 
 // --------------------------setup-------------------------------------------------------------
 void setup() {
-
+  
+  XRCEDDS_PORT.begin(115200);
+  while (!XRCEDDS_PORT);
+  ros2::init(&XRCEDDS_PORT);
+  
   for (byte i = 0; i < 6; i++) {
     pinMode(motor1PinNum[i], OUTPUT);
     pinMode(motor2PinNum[i], OUTPUT);
@@ -144,9 +148,7 @@ void setup() {
     digitalWrite(motor2PinNum[i], LOW);
   }
 
-  XRCEDDS_PORT.begin(115200);
-  while (!XRCEDDS_PORT);
-  ros2::init(&XRCEDDS_PORT);
+
   
 }
 
