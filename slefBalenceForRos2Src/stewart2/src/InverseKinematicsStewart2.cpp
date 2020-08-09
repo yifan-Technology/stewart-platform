@@ -18,6 +18,8 @@
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
+#define PI 3.14159265358979323846
+
 
 class InverseKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
 {
@@ -30,19 +32,19 @@ class InverseKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
         wb = 30;  //  Grad
         wp =30;
         height = 160.0;
-        b <<  radius_b*cos(Deg2Rad(30+wb/2)),    radius_b*sin(Deg2Rad(30+wb/2)),  0, 1,
-              radius_b*cos(Deg2Rad(150-wb/2)),   radius_b*sin(Deg2Rad(150-wb/2)), 0, 1,
-              radius_b*cos(Deg2Rad(150+wb/2)),   radius_b*sin(Deg2Rad(150+wb/2)), 0, 1,
-              radius_b*cos(Deg2Rad(270-wb/2)),   radius_b*sin(Deg2Rad(270-wb/2)), 0, 1,
-              radius_b*cos(Deg2Rad(270+wb/2)),   radius_b*sin(Deg2Rad(270+wb/2)), 0, 1,
-              radius_b*cos(Deg2Rad(30-wb/2)),    radius_b*sin(Deg2Rad(30-wb/2)),  0, 1;
+        b <<  radius_b*0.707,    radius_b*0.707,   0, 1,
+              radius_b*0.966,    radius_b*0.259,   0, 1,
+              radius_b*0.259,    radius_b*-0.966,  0, 1,
+              radius_b*-0.259,   radius_b*-0.966,  0, 1,
+              radius_b*-0.966,   radius_b*0.259,   0, 1,
+              radius_b*-0.707,   radius_b*0.707,   0, 1;
 
-        p <<  radius_p*cos(Deg2Rad(90-wp/2)),    radius_p*sin(Deg2Rad(90-wp/2)),  0, 1,
-              radius_p*cos(Deg2Rad(90+wp/2)),    radius_p*sin(Deg2Rad(90+wp/2)),  0, 1,
-              radius_p*cos(Deg2Rad(210-wp/2)),   radius_p*sin(Deg2Rad(210-wp/2)), 0, 1,
-              radius_p*cos(Deg2Rad(210+wp/2)),   radius_p*sin(Deg2Rad(210+wp/2)), 0, 1, 
-              radius_p*cos(Deg2Rad(330-wp/2)),   radius_p*sin(Deg2Rad(330-wp/2)), 0, 1,
-              radius_p*cos(Deg2Rad(330+wp/2)),   radius_p*sin(Deg2Rad(330+wp/2)), 0, 1;
+        p <<  radius_p*0.259,    radius_p*0.966,   0, 1,
+              radius_p*0.966,    radius_p*-0.259,  0, 1,
+              radius_p*0.707,    radius_p*-0.707,  0, 1,
+              radius_p*-0.707,   radius_p*-0.707,  0, 1, 
+              radius_p*-0.966,   radius_p*-0.259,  0, 1,
+              radius_p*-0.259,   radius_p*0.966,   0, 1;
 
 
       for (int i = 0; i < 6; i++)
@@ -50,8 +52,8 @@ class InverseKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
             f32ma_msg.data.push_back(0);
         }
          //this publisher_ for test,future can delete
-     publisher_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/stewart/test_length", 10);
-     //publisher_ = this->create_publisher<sensor_msgs::msg::JointState>("/Stewart_norm_JointState", 10);
+     //publisher_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/stewart/test_length", 10);
+     publisher_ = this->create_publisher<sensor_msgs::msg::JointState>("/Stewart_norm_JointState", 10);
 
      subscription_ = this->create_subscription<geometry_msgs::msg::Twist>(
     "/stewart/norm_platform_twist", 10, std::bind(&InverseKinematicsStewart2::callback, this, _1));
@@ -60,26 +62,26 @@ class InverseKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
   private:
 //this callback for test,future can delete
     
-  void callback(const geometry_msgs::msg::Twist::SharedPtr msg)
-    {
-        float x = msg->linear.x;
-        float y = msg->linear.y;
-        float z = msg->linear.z;
-        float roll = msg->angular.x;
-        float pitch = msg->angular.y;
-        float yaw = msg->angular.z;
-        this->caculatelength(x,y,z,roll,pitch,yaw);
-        publisher_->publish(f32ma_msg);
-    }
-    /*
+  // void callback(const geometry_msgs::msg::Twist::SharedPtr msg)
+  //   {
+  //       float x = msg->linear.x;
+  //       float y = msg->linear.y;
+  //       float z = msg->linear.z;
+  //       float roll = msg->angular.x;
+  //       float pitch = msg->angular.y;
+  //       float yaw = msg->angular.z;
+  //       this->caculatelength(x,y,z,roll,pitch,yaw);
+  //       publisher_->publish(f32ma_msg);
+  //   }
+    
     void callback(const geometry_msgs::msg::Twist::SharedPtr msg)
     {
         float x = msg->linear.x;
         float y = msg->linear.y;
         float z = msg->linear.z;
-        float roll = msg->angular.x;
-        float pitch = msg->angular.y;
-        float yaw = msg->angular.z;
+        float roll = msg->angular.x*PI/180.0;
+        float pitch = msg->angular.y*PI/180.0;
+        float yaw = msg->angular.z*PI/180.0;
         this->caculatelength(x,y,z,roll,pitch,yaw);
 
         sensor_msgs::msg::JointState pubMsg;
@@ -88,7 +90,7 @@ class InverseKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
         pubMsg.position.push_back(f32ma_msg.data[i]);
         }
         publisher_->publish(pubMsg);
-    }*/
+    }
 
     double Deg2Rad(double angular)
     {
@@ -108,12 +110,26 @@ class InverseKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
 
     void caculatelength(float x, float y, float z, float roll, float pitch, float yaw)
     {
+      double data[6];
+      bool protect = false;
         Eigen::Matrix<float, 4, 4> T = transformation_matrix(x, y, z + height, roll, pitch, yaw);
         for (size_t i = 0; i < 6; i++)
         {
             Eigen::Matrix<float, 4, 1> length = T*p.row(i).transpose() - b.row(i).transpose();
-            f32ma_msg.data[i] = sqrt(pow(length(0), 2) + pow(length(1), 2) + pow(length(2), 2));
+            data[i] = sqrt(pow(length(0), 2) + pow(length(1), 2) + pow(length(2), 2))-160.0;
         }
+        for(size_t i = 0; i < 6; i++)
+        {
+          if((data[i] > 99.8)||(data[i] < 0.2)){
+            protect = true;
+          } 
+        }
+        if(protect==false){
+          for(size_t i = 0; i < 6; i++){
+          f32ma_msg.data[i]= data[i];
+          }
+        }
+        
 
     }
 
@@ -126,8 +142,8 @@ class InverseKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
     Eigen::Matrix<float, 6, 4> b, p;
 
    //this publisher_ for test,future can delete
-    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr publisher_;
-    //rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr publisher_;
+    //rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr publisher_;
+    rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr publisher_;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr subscription_;
     std_msgs::msg::Float32MultiArray f32ma_msg;
   

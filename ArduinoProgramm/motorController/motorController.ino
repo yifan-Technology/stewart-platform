@@ -11,11 +11,11 @@ byte motor2PinNum[6] = {31, 33, 35, 37, 39, 41};
 byte motorPwmPinNum[6] = { 2, 3, 4, 5, 6, 7};
 byte motorPosPinNum[6] = {A1, A2, A3, A4, A5, A6};
 //----------------------------Declaration controller-------------------------------
-double normPos[6] = {50, 50, 50, 50, 50, 50};
+double normPos[6] = {80, 80, 80, 80, 80, 80};
 double actualPos[6] = {0, 0, 0, 0, 0, 0};
 double pwm[6] = {0, 0, 0, 0, 0, 0};
 double Kp[6] = {100, 100, 100, 100, 100, 90};
-double Ki[6] = {0, 0, 10, 10, 10, 0};
+double Ki[6] = {0, 0, 0, 0, 0, 0};
 double Kd[6] = {10, 10, 10, 10, 10, 10};
 
 AutoPID motorPID0(&actualPos[0], &normPos[0], &pwm[0], PWM_MIN, PWM_MAX, Kp[0], Ki[0], Kd[0]);
@@ -98,20 +98,20 @@ void setup() {
 }
 
 // loop
-/*
+
   void loop() {
   for (byte i = 0; i < 6; i++)
     motorController(i);
-  }*/
+  }
 
-void loop() {
-  motorController(0);
-  Serial.print(pwm[0]);
+/*void loop() {
+  motorController(5);
+  Serial.print(pwm[5]);
   Serial.print(',');
-  Serial.print(normPos[0]);
+  Serial.print(normPos[5]);
   Serial.print(',');
-  Serial.println(actualPos[0]);
-}
+  Serial.println(actualPos[5]);
+}*/
 
 /*
   void loop() {
