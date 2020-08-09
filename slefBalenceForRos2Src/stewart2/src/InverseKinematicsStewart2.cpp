@@ -52,11 +52,11 @@ class InverseKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
             f32ma_msg.data.push_back(0);
         }
          //this publisher_ for test,future can delete
-     //publisher_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/stewart/test_length", 10);
-     publisher_ = this->create_publisher<sensor_msgs::msg::JointState>("/Stewart_norm_JointState", 10);
+     //publisher_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/stewart/test_length", 1);
+     publisher_ = this->create_publisher<sensor_msgs::msg::JointState>("/Stewart_norm_JointState", 1);
 
      subscription_ = this->create_subscription<geometry_msgs::msg::Twist>(
-    "/stewart/norm_platform_twist", 10, std::bind(&InverseKinematicsStewart2::callback, this, _1));
+    "/stewart/norm_platform_twist", 1, std::bind(&InverseKinematicsStewart2::callback, this, _1));
 
 }
   private:

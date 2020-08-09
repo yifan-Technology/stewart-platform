@@ -27,9 +27,9 @@ class ImuAnalyse : public rclcpp::Node  // 2 means ros2
     ImuAnalyse()
     : Node("ImuAnalyse")
     {
-     publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("/stewart/norm_platform_twist", 10);
+     publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("/stewart/norm_platform_twist", 1);
      subscription_ = this->create_subscription<sensor_msgs::msg::Imu>(
-    "Stewart_actual_Imu", 10, std::bind(&ImuAnalyse::callback, this, _1));
+    "Stewart_actual_Imu", 1, std::bind(&ImuAnalyse::callback, this, _1));
     }
 
   private:

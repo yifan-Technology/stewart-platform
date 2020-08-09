@@ -6,7 +6,7 @@
 #include <math.h>
 
 #define XRCEDDS_PORT  Serial
-#define PUBLISH_FREQUENCY 100 //hz
+#define PUBLISH_FREQUENCY 10 //hz
 
 uint16_t BNO055_SAMPLERATE_DELAY_MS = 100;      //sunmingjun
 double x = -1000000, y = -1000000 , z = -1000000; //sunmingjun

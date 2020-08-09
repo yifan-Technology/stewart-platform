@@ -6,7 +6,7 @@
 #define PWM_MAX 4095
 
 #define XRCEDDS_PORT  Serial
-#define PUBLISH_FREQUENCY 100 //hz
+#define PUBLISH_FREQUENCY 10 //hz
 
 //----------------------------Declaration Pin Nummer------------------------------//
 byte motor1PinNum[6] = {30, 32, 34, 36, 38, 40};
