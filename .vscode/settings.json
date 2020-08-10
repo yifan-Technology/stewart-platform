@@ -1,0 +1,7 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/junjun/dev_ws/install/tutorial_interfaces/lib/python3.6/site-packages",
+        "/home/junjun/dev_ws/install/turtlesim/lib/python3.6/site-packages",
+        "/opt/ros/dashing/lib/python3.6/site-packages"
+    ]
+}
