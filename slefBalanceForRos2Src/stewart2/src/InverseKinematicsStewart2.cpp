@@ -29,22 +29,22 @@ class InverseKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
     {
         radius_p = 84;  
         radius_b = 150; 
-        wb = 30;  //  Grad
-        wp =30;
+        // wb = 30;  //  Grad
+        // wp =30;
         height = 160.0;
-        b <<  radius_b*0.707,    radius_b*0.707,   0, 1,
-              radius_b*0.966,    radius_b*0.259,   0, 1,
-              radius_b*0.259,    radius_b*-0.966,  0, 1,
-              radius_b*-0.259,   radius_b*-0.966,  0, 1,
-              radius_b*-0.966,   radius_b*0.259,   0, 1,
-              radius_b*-0.707,   radius_b*0.707,   0, 1;
+        b <<  radius_b*0.70710678,    radius_b*0.70710678,   0, 1,  //45
+              radius_b*0.96592582,    radius_b*0.25881904,   0, 1,  //15
+              radius_b*0.25881904,    radius_b*-0.96592582,  0, 1,  //285
+              radius_b*-0.25881904,   radius_b*-0.96592582,  0, 1,  //255
+              radius_b*-0.96592582,   radius_b*0.25881904,   0, 1,  //165
+              radius_b*-0.70710678,   radius_b*0.70710678,   0, 1;  //135
 
-        p <<  radius_p*0.259,    radius_p*0.966,   0, 1,
-              radius_p*0.966,    radius_p*-0.259,  0, 1,
-              radius_p*0.707,    radius_p*-0.707,  0, 1,
-              radius_p*-0.707,   radius_p*-0.707,  0, 1, 
-              radius_p*-0.966,   radius_p*-0.259,  0, 1,
-              radius_p*-0.259,   radius_p*0.966,   0, 1;
+        p <<  radius_p*0.25881904,    radius_p*0.96592582,   0, 1,  //75
+              radius_p*0.96592582,    radius_p*-0.25881904,  0, 1,  //345
+              radius_p*0.70710678,    radius_p*-0.70710678,  0, 1,  //315
+              radius_p*-0.70710678,   radius_p*-0.70710678,  0, 1,  //225
+              radius_p*-0.96592582,   radius_p*-0.25881904,  0, 1,  //195
+              radius_p*-0.25881904,   radius_p*0.96592582,   0, 1;  //105
 
 
       for (int i = 0; i < 6; i++)

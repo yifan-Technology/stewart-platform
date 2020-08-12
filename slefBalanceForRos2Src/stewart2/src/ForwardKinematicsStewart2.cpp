@@ -28,23 +28,36 @@ class ForwardKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
 
         radius_p = 84;  
         radius_b = 150; 
-        wb = 30;  //  Grad
-        wp =30;
+        // wb = 30;  //  Grad
+        // wp =30;
         height = 160;
+        b <<  radius_b*0.70710678,    radius_b*0.70710678,   0, 1,
+              radius_b*0.96592582,    radius_b*0.25881904,   0, 1,
+              radius_b*0.25881904,    radius_b*-0.96592582,  0, 1,
+              radius_b*-0.25881904,   radius_b*-0.96592582,  0, 1,
+              radius_b*-0.96592582,   radius_b*0.25881904,   0, 1,
+              radius_b*-0.70710678,   radius_b*0.70710678,   0, 1;
 
-        b <<  radius_b*cos(Deg2Rad(30+wb/2)),    radius_b*sin(Deg2Rad(30+wb/2)),  0, 1,
-              radius_b*cos(Deg2Rad(150-wb/2)),   radius_b*sin(Deg2Rad(150-wb/2)), 0, 1,
-              radius_b*cos(Deg2Rad(150+wb/2)),   radius_b*sin(Deg2Rad(150+wb/2)), 0, 1,
-              radius_b*cos(Deg2Rad(270-wb/2)),   radius_b*sin(Deg2Rad(270-wb/2)), 0, 1,
-              radius_b*cos(Deg2Rad(270+wb/2)),   radius_b*sin(Deg2Rad(270+wb/2)), 0, 1,
-              radius_b*cos(Deg2Rad(30-wb/2)),    radius_b*sin(Deg2Rad(30-wb/2)),  0, 1;
-
-        p <<  radius_p*cos(Deg2Rad(90-wp/2)),    radius_p*sin(Deg2Rad(90-wp/2)),  0, 1,
-              radius_p*cos(Deg2Rad(90+wp/2)),    radius_p*sin(Deg2Rad(90+wp/2)),  0, 1,
-              radius_p*cos(Deg2Rad(210-wp/2)),   radius_p*sin(Deg2Rad(210-wp/2)), 0, 1,
-              radius_p*cos(Deg2Rad(210+wp/2)),   radius_p*sin(Deg2Rad(210+wp/2)), 0, 1, 
-              radius_p*cos(Deg2Rad(330-wp/2)),   radius_p*sin(Deg2Rad(330-wp/2)), 0, 1,
-              radius_p*cos(Deg2Rad(330+wp/2)),   radius_p*sin(Deg2Rad(330+wp/2)), 0, 1;
+        p <<  radius_p*0.25881904,    radius_p*0.96592582,   0, 1,
+              radius_p*0.96592582,    radius_p*-0.25881904,  0, 1,
+              radius_p*0.70710678,    radius_p*-0.70710678,  0, 1,
+              radius_p*-0.70710678,   radius_p*-0.70710678,  0, 1, 
+              radius_p*-0.96592582,   radius_p*-0.25881904,  0, 1,
+              radius_p*-0.25881904,   radius_p*0.96592582,   0, 1;
+        // b <<  radius_b*cos(Deg2Rad(30+wb/2)),    radius_b*sin(Deg2Rad(30+wb/2)),  0, 1,
+        //       radius_b*cos(Deg2Rad(30-wb/2)),    radius_b*sin(Deg2Rad(30-wb/2)),  0, 1;
+        //       radius_b*cos(Deg2Rad(270+wb/2)),   radius_b*sin(Deg2Rad(270+wb/2)), 0, 1,
+        //       radius_b*cos(Deg2Rad(270-wb/2)),   radius_b*sin(Deg2Rad(270-wb/2)), 0, 1,
+        //       radius_b*cos(Deg2Rad(150+wb/2)),   radius_b*sin(Deg2Rad(150+wb/2)), 0, 1,
+        //       radius_b*cos(Deg2Rad(150-wb/2)),   radius_b*sin(Deg2Rad(150-wb/2)), 0, 1,
+              
+        // p <<  radius_p*cos(Deg2Rad(90-wp/2)),    radius_p*sin(Deg2Rad(90-wp/2)),  0, 1,
+        //       radius_p*cos(Deg2Rad(330+wp/2)),   radius_p*sin(Deg2Rad(330+wp/2)), 0, 1;
+        //       radius_p*cos(Deg2Rad(330-wp/2)),   radius_p*sin(Deg2Rad(330-wp/2)), 0, 1,
+        //       radius_p*cos(Deg2Rad(210+wp/2)),   radius_p*sin(Deg2Rad(210+wp/2)), 0, 1, 
+        //       radius_p*cos(Deg2Rad(210-wp/2)),   radius_p*sin(Deg2Rad(210-wp/2)), 0, 1,
+        //       radius_p*cos(Deg2Rad(90+wp/2)),    radius_p*sin(Deg2Rad(90+wp/2)),  0, 1,
+              
 
      publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("/stewart/actual_platform_twist", 10);
      
