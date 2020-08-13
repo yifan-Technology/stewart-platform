@@ -7,7 +7,7 @@ A package to transfer the camera infos as PID-controller's input and it's output
 ##### Structure:
 
 ```mermaid
-graph TD
+graph LR
 A[cameraanalyse] -->|Ball_Position|C[controller]
 C -->|pitch winkel| D[motor]
 C -->|roll winkel| D[motor]
