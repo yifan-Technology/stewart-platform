@@ -29,9 +29,8 @@ while(True):
     cmd = uart.read(4)
     if(cmd == b'send'):
         uart.write(ustruct.pack("<lll", position[0],position[1],position[2]))
-    else:
-        for blob in img.find_blobs(thresholds2, pixels_threshold=200, area_threshold=200):
-            img.draw_rectangle(blob.rect())
-            position[0] = blob.cx()
-            position[1] = blob.cy()
-            print(position)
+    for blob in img.find_blobs(thresholds2, pixels_threshold=200, area_threshold=200):
+        img.draw_rectangle(blob.rect())
+        position[0] = blob.cx()
+        position[1] = blob.cy()
+        print(position)
