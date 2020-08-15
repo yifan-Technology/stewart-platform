@@ -59,9 +59,9 @@ private:
     float z = 0;
 
     //PID Regler nach Fallunterscheidung veraendbar
-    PID *pid1 = new PID(2.5,1,1,0,x);//kp,ki,kd,soll,ist 
+    PID *pid1 = new PID(60,10,0.28,0,x);//kp,ki,kd,soll,ist 
     float ReglerOutput_x = pid1->PID_run(pid1);
-    PID *pid2 = new PID(2.5,1,1,0,y);//kp,ki,kd,soll,ist 
+    PID *pid2 = new PID(60,10,0.28,0,y);//kp,ki,kd,soll,ist 
     float ReglerOutput_y = pid2->PID_run(pid2);
 
     geometry_msgs::msg::Twist pubmsg;
