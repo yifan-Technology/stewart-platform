@@ -28,9 +28,9 @@ class ForwardKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
 
         radius_p = 84;  
         radius_b = 150; 
+        z_home＝219;
         // wb = 30;  //  Grad
         // wp =30;
-        height = 160;
         b <<  radius_b*0.70710678,    radius_b*0.70710678,   0, 1,
               radius_b*0.96592582,    radius_b*0.25881904,   0, 1,
               radius_b*0.25881904,    radius_b*-0.96592582,  0, 1,
@@ -114,7 +114,7 @@ class ForwardKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
         float Wy = q(4,0);
         float Wz = q(5,0);
 
-        Eigen::Matrix<double, 4, 4> T = transformation_matrix(x, y, z + height, Wx, Wy, Wz);
+        Eigen::Matrix<double, 4, 4> T = transformation_matrix(x, y, z + z_home, Wx, Wy, Wz);
         double result[6];
         for (size_t i = 0; i < 6; i++)
         {
@@ -2883,11 +2883,11 @@ J_inverse << J_inverse_array[0][0]/J_det,   J_inverse_array[0][1]/J_det,  J_inve
       return q_i;
     }
 
-    float height;
     float radius_p;  
     float radius_b; 
-    float wb;  //  Grad
-    float wp;
+    //float wb;  //  Grad
+    //float wp;
+    float z_home;
 
     Eigen::Matrix<double, 6, 4> b, p;
     Eigen::Matrix<double, 6, 1> q_init;
