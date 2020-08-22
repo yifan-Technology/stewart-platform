@@ -31,7 +31,7 @@ class InverseKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
         radius_b = 150; 
         // wb = 30;  //  Grad
         // wp =30;
-        height = 160.0;
+        height = 218.0;
         b <<  radius_b*0.70710678,    radius_b*0.70710678,   0, 1,  //45
               radius_b*0.96592582,    radius_b*0.25881904,   0, 1,  //15
               radius_b*0.25881904,    radius_b*-0.96592582,  0, 1,  //285
@@ -116,7 +116,7 @@ class InverseKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
         for (size_t i = 0; i < 6; i++)
         {
             Eigen::Matrix<float, 4, 1> length = T*p.row(i).transpose() - b.row(i).transpose();
-            data[i] = sqrt(pow(length(0), 2) + pow(length(1), 2) + pow(length(2), 2))-160.0;
+            data[i] = sqrt(pow(length(0), 2) + pow(length(1), 2) + pow(length(2), 2))-186.0;
         }
         for(size_t i = 0; i < 6; i++)
         {
