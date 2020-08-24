@@ -17,7 +17,7 @@ graph TD
 A[Imu Sensor]-->|Stewart_actual_Imu|B[Imuanalyse]
 B-->|/stewart/norm_platform_twist|C[ForwardKinematicsStewart2]
 F[arduino due]-->|/Stewart_actual_JointState|C
-C-->|/stewart/actual_platform_twist|G[visualization&error analyse]
+C-->|/stewart/actual_platform_twist|G[visualization & error analyse]
 B-->|/stewart/norm_platform_twist|D[InversKinematicsStewart2]
 D-->|/Stewart_norm_JointState|H[arduino due]
 
