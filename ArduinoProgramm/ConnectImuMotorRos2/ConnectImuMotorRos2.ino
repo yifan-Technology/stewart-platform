@@ -11,6 +11,7 @@
 
 #define XRCEDDS_PORT  Serial
 #define PUBLISH_FREQUENCY 10 //hz
+
 //----------------------------BNO055 setup-----------------------------------------//
 uint16_t BNO055_SAMPLERATE_DELAY_MS = 100;     
 double x = -1000000, y = -1000000 , z = -1000000; 
@@ -38,7 +39,7 @@ byte motor2PinNum[6] = {31, 33, 35, 37, 39, 41};
 byte motorPwmPinNum[6] = { 2, 3, 4, 5, 6, 7};
 byte motorPosPinNum[6] = {A1, A2, A3, A4, A5, A6};
 //----------------------------Declaration controller-------------------------------//
-double normPos[6] = {25, 25, 25, 25, 25, 25};
+double normPos[6] = {50, 50, 50, 50, 50, 50};
 double actualPos[6] = {0, 0, 0, 0, 0, 0};
 double pwm[6] = {0, 0, 0, 0, 0, 0};
 double Kp[6] = {100, 100, 100, 100, 100, 100};
@@ -206,16 +207,16 @@ void subscribeJointState(sensor_msgs::JointState* msg, void* arg)
 
 }
 
-class arduinoPubImu : public ros2::Node
-{
-  public:
-    arduinoPubImu()
-      : Node("StewartImu_pub_node")
-    {
-      ros2::Publisher<sensor_msgs::Imu>* publisher_Imu = this->createPublisher<sensor_msgs::Imu>("Stewart_actual_Imu");
-      this->createWallFreq(PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishImu, nullptr, publisher_Imu);
-    }
-};
+//class arduinoPubImu : public ros2::Node
+//{
+//  public:
+//    arduinoPubImu()
+//      : Node("StewartImu_pub_node")
+//    {
+//      ros2::Publisher<sensor_msgs::Imu>* publisher_Imu = this->createPublisher<sensor_msgs::Imu>("Stewart_actual_Imu");
+//      this->createWallFreq(PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishImu, nullptr, publisher_Imu);
+//    }
+//};
 
 
 
@@ -225,6 +226,10 @@ class JointStatePubAndSub : public ros2::Node
     JointStatePubAndSub()
       : Node("ros2arduino_pub_sub_node")
     {
+      /*Imu*/
+      ros2::Publisher<sensor_msgs::Imu>* publisher_Imu = this->createPublisher<sensor_msgs::Imu>("Stewart_actual_Imu");         
+      this->createWallFreq(PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishImu, nullptr, publisher_Imu);
+      /*Joint*/
       ros2::Publisher<sensor_msgs::JointState>* publisher_ = this->createPublisher<sensor_msgs::JointState>("Stewart_actual_JointState");
       this->createWallFreq(PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishJointState, nullptr, publisher_);
       this->createSubscriber<sensor_msgs::JointState>("Stewart_norm_JointState", (ros2::CallbackFunc)subscribeJointState, nullptr);
@@ -250,7 +255,9 @@ void setup() {
     pinMode(motorPwmPinNum[i], OUTPUT);
     digitalWrite(motor1PinNum[i], LOW);
     digitalWrite(motor2PinNum[i], LOW);
+    
   }
+
 
  
 
@@ -261,12 +268,15 @@ void setup() {
 
 void loop(){
   static JointStatePubAndSub JointStateNode;
-  static arduinoPubImu arduinoPubImuNode;
-  ros2::spin(&arduinoPubImuNode);
+  //static arduinoPubImu arduinoPubImuNode;
+  //ros2::spin(&arduinoPubImuNode);
   ros2::spin(&JointStateNode);
-  for (byte i = 0; i < 6; i++)
-    motorController(i);
+  for (byte motorNum = 0; motorNum < 6; motorNum++)
+    
+    motorController(motorNum);
+
   }
+  
 /* 
 void loop() {
   motorController(0);
