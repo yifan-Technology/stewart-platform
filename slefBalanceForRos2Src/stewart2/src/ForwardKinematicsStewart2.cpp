@@ -28,9 +28,9 @@ class ForwardKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
 
         radius_p = 84;  
         radius_b = 150; 
-        z_home＝219;
         // wb = 30;  //  Grad
         // wp =30;
+        z_home = 218;
         b <<  radius_b*0.70710678,    radius_b*0.70710678,   0, 1,
               radius_b*0.96592582,    radius_b*0.25881904,   0, 1,
               radius_b*0.25881904,    radius_b*-0.96592582,  0, 1,
@@ -81,8 +81,12 @@ class ForwardKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
     {
         Eigen::Matrix<double, 6, 1> l;
         l << msg->position[0], msg->position[1], msg->position[2], msg->position[3],msg->position[4],msg->position[5];
-
-        Eigen::Matrix<double, 6, 1> q = Iteraltion(l);
+        Eigen::Matrix<double, 6, 1> pow_l;
+        for (int i = 0 ; i<6;i++)                 
+        {
+          pow_l[i]=pow(l[i],2);
+        }
+        Eigen::Matrix<double, 6, 1> q = Iteraltion(pow_l);  //changed
         geometry_msgs::msg::Twist pubmsg;
 
         pubmsg.linear.x = q(0,0);
@@ -119,7 +123,7 @@ class ForwardKinematicsStewart2 : public rclcpp::Node  // 2 means ros2
         for (size_t i = 0; i < 6; i++)
         {
             Eigen::Matrix<double, 4, 1> length = T*p.row(i).transpose() - b.row(i).transpose();
-            result[i] = sqrt(pow(length(0), 2) + pow(length(1), 2) + pow(length(2), 2));
+            result[i] = pow(length(0), 2) + pow(length(1), 2) + pow(length(2), 2); //changed
         }
         Eigen::Matrix<double, 6, 1> l;
         l << result[0], result[1],  result[2], result[3],result[4], result[5];
@@ -2853,7 +2857,7 @@ J_inverse << J_inverse_array[0][0]/J_det,   J_inverse_array[0][1]/J_det,  J_inve
       
       while ((iteraltime < 10) && (loss > 1e-1))
       {
-        Eigen::Matrix<double, 6, 1> delta_l = (caculatelength(q_i))^2 - (l_given)^2; 
+        Eigen::Matrix<double, 6, 1> delta_l = caculatelength(q_i)  - l_given ;
 
 
         float minWert  = delta_l.minCoeff();
@@ -2883,11 +2887,11 @@ J_inverse << J_inverse_array[0][0]/J_det,   J_inverse_array[0][1]/J_det,  J_inve
       return q_i;
     }
 
+    float z_home;
     float radius_p;  
     float radius_b; 
-    //float wb;  //  Grad
-    //float wp;
-    float z_home;
+    float wb;  //  Grad
+    float wp;
 
     Eigen::Matrix<double, 6, 4> b, p;
     Eigen::Matrix<double, 6, 1> q_init;
