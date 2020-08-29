@@ -1,38 +1,12 @@
-
 #include "AutoPID.h"
 #include <ros2arduino.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BNO055.h>
-#include <utility/imumaths.h>
-#include <math.h>
 #define ANALOG_BIT 12
 #define PWM_MIN -4095 //mega:8bit max 255, due:12bit 4095 
 #define PWM_MAX 4095
 
 #define XRCEDDS_PORT  Serial
-#define PUBLISH_FREQUENCY 10 //hz
+#define PUBLISH_FREQUENCY 500 //hz
 
-//----------------------------BNO055 setup-----------------------------------------//
-uint16_t BNO055_SAMPLERATE_DELAY_MS = 100;     
-double x = -1000000, y = -1000000 , z = -1000000; 
-// Check I2C device address and correct line below (by default address is 0x29 or 0x28)
-Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);   
-
-/*gloabl variale for i2c Measurements. if necessary, covariance ist seted*/
-double actual_angular_velocity_x = 0; 
-double actual_angular_velocity_y = 0;   
-double actual_angular_velocity_z = 0;  
- 
-double actual_linear_acceleration_x = 0;   
-double actual_linear_acceleration_y = 0;  
-double actual_linear_acceleration_z = 0;   
-
-double actual_orientation_x = 0;   
-double actual_orientation_y = 0;  
-double actual_orientation_z = 0;   
-double actual_orientation_w = 0;    
-
-char imu_frame_id[] = "map";// kann change another frame_id, but tf is needed.
 //----------------------------Declaration Pin Nummer------------------------------//
 byte motor1PinNum[6] = {30, 32, 34, 36, 38, 40};
 byte motor2PinNum[6] = {31, 33, 35, 37, 39, 41};
@@ -109,68 +83,6 @@ void motorController(byte motorNum) {
   //1->2 is positive; 2->1 is negative;
 }
 //---------------------------ros2-------------------------------------------------------------
-//-----------------------------------Imu-------------------------------------//
-void publishImu(sensor_msgs::Imu* msg, void* arg)
-{
-  (void)(arg);
-  
-  static unsigned long startTime = 0;
-  if (startTime == 0){
-
-  msg->header.stamp.sec = 0;
-  msg->header.stamp.nanosec = 0;
-    startTime = millis();
-  }
-  else{
-    
-    unsigned int time_diff = millis() - startTime;//ms
-    msg->header.stamp.sec = time_diff/1000.0;
-    msg->header.stamp.nanosec = time_diff*1000000;
-    
-    }
-for (int i = 0; i < sizeof(imu_frame_id);i++){
-  msg->header.frame_id[i] = imu_frame_id[i];
-}
-  imu::Vector<3> acc = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
-  actual_angular_velocity_x = acc.x();
-  actual_angular_velocity_y = acc.y();
-  actual_angular_velocity_z = acc.z();
-  
-  msg->angular_velocity.x = actual_angular_velocity_x;     
-  msg->angular_velocity.y = actual_angular_velocity_y;    
-  msg->angular_velocity.z = actual_angular_velocity_z;    
-  
-  imu::Vector<3> lic = bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL); //sun
-  actual_linear_acceleration_x = lic.x();
-  actual_linear_acceleration_y = lic.y();
-  actual_linear_acceleration_z = lic.z();
-  msg->linear_acceleration.x = actual_linear_acceleration_x;   
-  msg->linear_acceleration.y = actual_linear_acceleration_y;   
-  msg->linear_acceleration.z = actual_linear_acceleration_z;  
-
- 
-  //sensors_event_t orientationData , angVelocityData , linearAccelData;  //gong
-  imu::Quaternion quat = bno.getQuat();   
-  actual_orientation_x = -quat.x();   
-  actual_orientation_y = -quat.y();   
-  actual_orientation_z = quat.z();   
-  actual_orientation_w = quat.w();   
-
-  
-  msg->orientation.x = actual_orientation_x;
-  msg->orientation.y = actual_orientation_y;
-  msg->orientation.z = actual_orientation_z;
-  msg->orientation.w = actual_orientation_w;
-
-}
-
-
-
-
-//------------------------------------jointState-------------------------------//
-
-
-
 void publishJointState(sensor_msgs::JointState* msg, void* arg)
 {
   (void)(arg);
@@ -207,29 +119,12 @@ void subscribeJointState(sensor_msgs::JointState* msg, void* arg)
 
 }
 
-//class arduinoPubImu : public ros2::Node
-//{
-//  public:
-//    arduinoPubImu()
-//      : Node("StewartImu_pub_node")
-//    {
-//      ros2::Publisher<sensor_msgs::Imu>* publisher_Imu = this->createPublisher<sensor_msgs::Imu>("Stewart_actual_Imu");
-//      this->createWallFreq(PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishImu, nullptr, publisher_Imu);
-//    }
-//};
-
-
-
 class JointStatePubAndSub : public ros2::Node
 {
   public:
     JointStatePubAndSub()
       : Node("ros2arduino_pub_sub_node")
     {
-      /*Imu*/
-      ros2::Publisher<sensor_msgs::Imu>* publisher_Imu = this->createPublisher<sensor_msgs::Imu>("Stewart_actual_Imu");         
-      this->createWallFreq(PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishImu, nullptr, publisher_Imu);
-      /*Joint*/
       ros2::Publisher<sensor_msgs::JointState>* publisher_ = this->createPublisher<sensor_msgs::JointState>("Stewart_actual_JointState");
       this->createWallFreq(PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishJointState, nullptr, publisher_);
       this->createSubscriber<sensor_msgs::JointState>("Stewart_norm_JointState", (ros2::CallbackFunc)subscribeJointState, nullptr);
@@ -243,23 +138,15 @@ void setup() {
   XRCEDDS_PORT.begin(115200);
   while (!XRCEDDS_PORT);
   ros2::init(&XRCEDDS_PORT);
-  while (!bno.begin())
-  {
-    /* There was a problem detecting the BNO055 ... check your connections */
-     ;
-  }//gong
-  delay(1000);
+  
   for (byte i = 0; i < 6; i++) {
     pinMode(motor1PinNum[i], OUTPUT);
     pinMode(motor2PinNum[i], OUTPUT);
     pinMode(motorPwmPinNum[i], OUTPUT);
     digitalWrite(motor1PinNum[i], LOW);
     digitalWrite(motor2PinNum[i], LOW);
-    
   }
 
-
- 
 
   
 }
@@ -268,15 +155,10 @@ void setup() {
 
 void loop(){
   static JointStatePubAndSub JointStateNode;
-  //static arduinoPubImu arduinoPubImuNode;
-  //ros2::spin(&arduinoPubImuNode);
   ros2::spin(&JointStateNode);
-  for (byte motorNum = 0; motorNum < 6; motorNum++)
-    
-    motorController(motorNum);
-
+  for (byte i = 0; i < 6; i++)
+    motorController(i);
   }
-  
 /* 
 void loop() {
   motorController(0);
