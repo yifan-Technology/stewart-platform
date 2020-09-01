@@ -1,0 +1,21 @@
+void SpeedCalculation (double norm[6], double act[6]); // 声明
+double MaxSpeed = 46; //mm
+void SpeedCalculation (double norm[6], double act[6]) // 如果不使用函数，也可以把代码替换Arduino代码的69到84行（即PID Controller尚未介入的时刻），同时注意修改。
+{
+    int MaxDiffElemNum = 0;
+    double diff[6] = 0;
+    double Speed[6] = 0; //此速度为6个电机的速度，已经包含方向，单位为mm/s，需要将其换算成-4095到4095的数值。
+    for(int i=1; i<6; i++)
+    {
+        diff[i] = norm[i] - act[i]; 
+        if(abs(diff[i]) > abs(diff[MaxDiffElemNum]) 
+        {
+            MaxDiffElemNum = i;
+        }
+    }
+    double Time = (abs(diff[MaxDiffElemNum])-1.5)/MaxSpeed; //1.5是指PID尚未介入的时刻，此代码使6个电机同时到达距离目标尚有1.5毫米绝对值的位置。剩下的1.5毫米由PID Controller介入。
+    for(int j = 0; j < 6 ; j++)
+    {
+        Speed[j] = diff[j]/Time; //速度单位为mm/s，已包含方向。
+    }
+}
