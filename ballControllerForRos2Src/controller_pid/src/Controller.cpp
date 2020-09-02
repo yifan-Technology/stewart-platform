@@ -4,13 +4,13 @@
 #include <functional>
 
 #include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/point32.hpp"
+#include "geometry_msgs/msg/point.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 
 using namespace std;
 using namespace std::chrono_literals;
 using std::placeholders::_1;
-
+float konst = 100; 
 class PID
 {
 public:
@@ -41,14 +41,15 @@ public:
   Controller()
   : Node("PID_Controll")
   {
-    subscription_ = this->create_subscription<geometry_msgs::msg::Point32>(
-      "Ball_Position", 10, std::bind(&Controller::topic_callback, this, _1));
-    publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("Output_Controller", 10);
-      //timer_ = this->create_wall_timer(500ms, std::bind(&Controller::topic_callback, this));
+    subscription_ = this->create_subscription<geometry_msgs::msg::Point>(
+      "stewart2/ballPositon", 10, std::bind(&Controller::topic_callback, this, _1));
+    
+    publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("/stewart/norm_platform_twist", 10);
+      timer_ = this->create_wall_timer(100ms, std::bind(&Controller::topic_callback, this)); //10hz
   }
 
 private:
-  void topic_callback(const geometry_msgs::msg::Point32::SharedPtr msg) const
+  void topic_callback(const geometry_msgs::msg::Point::SharedPtr msg) const
   {
     //show recieved msg from camera in the console
     // RCLCPP_INFO(this->get_logger(), "I heard: '%s'", std::to_string(msg->x).c_str());
@@ -60,24 +61,29 @@ private:
 
     //PID Regler nach Fallunterscheidung veraendbar
     PID *pid1 = new PID(60,10,0.28,0,x);//kp,ki,kd,soll,ist 
-    float ReglerOutput_x = pid1->PID_run(pid1);
+    float ReglerOutput_x = (pid1->PID_run(pid1))/konst;
     PID *pid2 = new PID(60,10,0.28,0,y);//kp,ki,kd,soll,ist 
-    float ReglerOutput_y = pid2->PID_run(pid2);
+    float ReglerOutput_y = (pid2->PID_run(pid2))/konst;
+
+    if(ReglerOutput_x<-20)ReglerOutput_x=-20;
+    if(ReglerOutput_x>20)ReglerOutput_x=20;
+    if(ReglerOutput_y<-20)ReglerOutput_y=-20;
+    if(ReglerOutput_y>20)ReglerOutput_y=20;
 
     geometry_msgs::msg::Twist pubmsg;
 
     pubmsg.linear.x = 0;
     pubmsg.linear.y = 0;
     pubmsg.linear.z = 0;
-    pubmsg.angular.x = -ReglerOutput_y; //Vorzeichen!!!!!
+    pubmsg.angular.x = ReglerOutput_y; //Vorzeichen!!!!!
     pubmsg.angular.y = -ReglerOutput_x;
     pubmsg.angular.z = 0;
     
     publisher_->publish(pubmsg);
   }
 
-  rclcpp::Subscription<geometry_msgs::msg::Point32>::SharedPtr subscription_;
-  //rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr subscription_;
+  rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
 };
 
