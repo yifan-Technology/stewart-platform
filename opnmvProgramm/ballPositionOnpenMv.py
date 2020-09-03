@@ -42,6 +42,6 @@ while(True):
         img.draw_rectangle(blob.rect())
         x = blob.cx()- offsetX
         y = blob.cy()- offsetY
-        position[0] = y
+        position[0] = -y
         position[1] = -x
         print(position)
