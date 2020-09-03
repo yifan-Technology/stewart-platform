@@ -5,7 +5,7 @@
 #define PWM_MAX 4095
 
 #define XRCEDDS_PORT  Serial
-#define PUBLISH_FREQUENCY 500 //hz
+#define PUBLISH_FREQUENCY 20 //hz
 
 //----------------------------Declaration Pin Nummer------------------------------//
 byte motor1PinNum[6] = {30, 32, 34, 36, 38, 40};
@@ -30,7 +30,7 @@ AutoPID motorPID5(&actualPos[5], &normPos[5], &pwm[5], PWM_MIN, PWM_MAX, Kp[5], 
 AutoPID motorPID[6] = {motorPID0, motorPID1, motorPID2, motorPID3, motorPID4, motorPID5};
 
 //---------------------------fuction motor controller------------------------------------------
-void motorController(byte motorNum) {
+void motorController(byte motorNum, int user_PWM_MAX) {
   analogReadResolution(ANALOG_BIT);
   analogWriteResolution(ANALOG_BIT);
   actualPos[motorNum] = 100.0 * analogRead(motorPosPinNum[motorNum]) / PWM_MAX;
@@ -46,13 +46,13 @@ void motorController(byte motorNum) {
       if (diffposition < 0)  {
         digitalWrite(motor1PinNum[motorNum], HIGH);         //前进
         digitalWrite(motor2PinNum[motorNum], LOW);
-        analogWrite(motorPwmPinNum[motorNum], PWM_MAX);    //全速
+        analogWrite(motorPwmPinNum[motorNum], user_PWM_MAX);    //全速
 
       }
       else if (diffposition > 0) {
         digitalWrite(motor1PinNum[motorNum], LOW);          //后退
         digitalWrite(motor2PinNum[motorNum], HIGH);
-        analogWrite(motorPwmPinNum[motorNum], PWM_MAX);    //全速
+        analogWrite(motorPwmPinNum[motorNum], user_PWM_MAX);    //全速
 
       }
     }
@@ -145,6 +145,7 @@ void setup() {
     pinMode(motorPwmPinNum[i], OUTPUT);
     digitalWrite(motor1PinNum[i], LOW);
     digitalWrite(motor2PinNum[i], LOW);
+    analogWrite(motorPwmPinNum[i], 0);
   }
 
 
@@ -156,9 +157,13 @@ void setup() {
 void loop(){
   static JointStatePubAndSub JointStateNode;
   ros2::spin(&JointStateNode);
-  for (byte i = 0; i < 6; i++)
-    motorController(i);
-  }
+  motorController(0,PWM_MAX-240);
+  motorController(1,PWM_MAX-240);
+  motorController(2,PWM_MAX-240);
+  motorController(3,PWM_MAX-240);
+  motorController(4,PWM_MAX);
+  motorController(5,PWM_MAX-240);
+ } 
 /* 
 void loop() {
   motorController(0);
