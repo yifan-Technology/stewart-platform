@@ -11,6 +11,7 @@ using namespace std;
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 float konst = 100; 
+float offset = 10; 
 class PID
 {
 public:
@@ -45,7 +46,7 @@ public:
       "stewart2/ballPositon", 10, std::bind(&Controller::topic_callback, this, _1));
     
     publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("/stewart/norm_platform_twist", 10);
-      timer_ = this->create_wall_timer(100ms, std::bind(&Controller::topic_callback, this)); //10hz
+      //timer_ = this->create_wall_timer(100ms, std::bind(&Controller::topic_callback, this)); //10hz
   }
 
 private:
@@ -58,12 +59,20 @@ private:
     float x = msg->x;
     float y = msg->y;
     float z = 0;
+    float ReglerOutput_x = 0;
+    float ReglerOutput_y = 0;
 
     //PID Regler nach Fallunterscheidung veraendbar
-    PID *pid1 = new PID(60,10,0.28,0,x);//kp,ki,kd,soll,ist 
-    float ReglerOutput_x = (pid1->PID_run(pid1))/konst;
-    PID *pid2 = new PID(60,10,0.28,0,y);//kp,ki,kd,soll,ist 
-    float ReglerOutput_y = (pid2->PID_run(pid2))/konst;
+    if(x<-offset||x>offset){
+      PID *pid1 = new PID(60,10,0.28,0,x);//kp,ki,kd,soll,ist 
+      ReglerOutput_x = (pid1->PID_run(pid1))/konst;
+    }
+    
+    if(y<-offset||y>offset){
+      PID *pid2 = new PID(60,10,0.28,0,y);//kp,ki,kd,soll,ist 
+      ReglerOutput_y = (pid2->PID_run(pid2))/konst;
+
+    }
 
     if(ReglerOutput_x<-20)ReglerOutput_x=-20;
     if(ReglerOutput_x>20)ReglerOutput_x=20;
@@ -83,7 +92,7 @@ private:
   }
 
   rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr subscription_;
-  rclcpp::TimerBase::SharedPtr timer_;
+  //rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
 };
 
