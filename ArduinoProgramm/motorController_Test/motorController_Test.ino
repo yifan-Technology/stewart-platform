@@ -4,6 +4,7 @@
 #define PWM_MIN -4095 //mega:8bit max 255, due:12bit 4095 
 #define PWM_MAX 4095
 
+double motorRange = 50; //mm 电机理想行程
 
 //----------------------------Declaration Pin Nummer------------------------------/
 byte motor1PinNum[6] = {30, 32, 34, 36, 38, 40};
@@ -11,10 +12,10 @@ byte motor2PinNum[6] = {31, 33, 35, 37, 39, 41};
 byte motorPwmPinNum[6] = { 2, 3, 4, 5, 6, 7};
 byte motorPosPinNum[6] = {A1, A2, A3, A4, A5, A6};
 //----------------------------Declaration controller-------------------------------
-double normPos[6] = {80, 80, 80, 80, 80, 80};
+double normPos[6] = {motorRange, motorRange, motorRange, motorRange, motorRange, motorRange};
 double actualPos[6] = {0, 0, 0, 0, 0, 0};
 double pwm[6] = {0, 0, 0, 0, 0, 0};
-double Kp[6] = {100, 100, 100, 100, 100, 90};
+double Kp[6] = {100, 100, 100, 100, 100, 100};
 double Ki[6] = {0, 0, 0, 0, 0, 0};
 double Kd[6] = {10, 10, 10, 10, 10, 10};
 
@@ -40,7 +41,7 @@ void motorController(byte motorNum) {
   }
   else {
 
-    if (abs(diffposition) > 1.3) {
+    if (abs(diffposition) > 1.5) {
       if (diffposition < 0)  {
         digitalWrite(motor1PinNum[motorNum], HIGH);         //前进
         digitalWrite(motor2PinNum[motorNum], LOW);
@@ -51,11 +52,10 @@ void motorController(byte motorNum) {
         digitalWrite(motor1PinNum[motorNum], LOW);          //后退
         digitalWrite(motor2PinNum[motorNum], HIGH);
         analogWrite(motorPwmPinNum[motorNum], PWM_MAX);    //全速
-
       }
     }
 
-    else if (abs(diffposition) < 1.3)
+    else if (abs(diffposition) < 1.5)
     { //pid介入控制
       motorPID[motorNum].run();
       if (pwm[motorNum] > 0) {
@@ -86,7 +86,7 @@ void motorController(byte motorNum) {
 
 // setup
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(15200);
   for (byte i = 0; i < 6; i++) {
     pinMode(motor1PinNum[i], OUTPUT);
     pinMode(motor2PinNum[i], OUTPUT);
@@ -97,21 +97,24 @@ void setup() {
 
 }
 
-// loop
+//// loop
+//
+//  void loop() {
+//  for (byte i = 0; i < 6; i++)
+//    motorController(i);
+//  }
 
-  void loop() {
-  for (byte i = 0; i < 6; i++)
-    motorController(i);
-  }
-
-/*void loop() {
-  motorController(5);
-  Serial.print(pwm[5]);
-  Serial.print(',');
-  Serial.print(normPos[5]);
-  Serial.print(',');
-  Serial.println(actualPos[5]);
-}*/
+void loop() {
+  int moterNum = 5;   //启动?号电机
+  motorController(moterNum);
+  //Serial.print(pwm[moterNum]);
+  //Serial.print(',');
+  Serial.print("norm Position: n");
+  Serial.print(normPos[moterNum]"\n");
+  Serial.print(';     ');
+  //Serial.print("actual position: ");
+  Serial.println(actualPos[moterNum]"\n");
+}
 
 /*
   void loop() {
